@@ -1,0 +1,26 @@
+name: my-php-${PHP_VERSION}
+services:
+    php-server:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                GID: "1000"
+                UID: "1000"
+                PHP_VERSION: ${PHP_VERSION}
+        cpu_shares: 90
+        container_name: php-apache
+        deploy:
+            resources:
+                limits:
+                    memory: "768M"
+                reservations:
+                    memory: "256M"
+        hostname: php-apache
+        image: my-php-${PHP_VERSION}:latest
+        ports:
+            - "81:80"
+        restart: unless-stopped
+        volumes:
+            - ./htdocs/:/var/www/html
+            - ./config/php/php.ini:/usr/local/etc/php/php.ini
