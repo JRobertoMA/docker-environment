@@ -49,7 +49,6 @@ RUN apt-get update && apt-get install -y \
         mbstring \
         fileinfo \
         xml \
-    && echo "zend_extension=$(php-config --extension-dir)/opcache.so" > /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
