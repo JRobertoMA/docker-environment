@@ -57,7 +57,6 @@ docker exec php-apache php -m
 | `./htdocs/` | `/var/www/html` |
 | `./config/php/php.ini` | `/usr/local/etc/php/php.ini` |
 | `./config/apache/000-default.conf` | `/etc/apache2/sites-available/000-default.conf` |
-| `./config/apache/apache2.conf` | `/etc/apache2/conf-available/allowoverride.conf` |
 
 ---
 
