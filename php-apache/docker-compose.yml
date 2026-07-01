@@ -24,3 +24,4 @@ services:
         volumes:
             - ./htdocs/:/var/www/html
             - ./config/php/php.ini:/usr/local/etc/php/php.ini
+            - /sys/class/thermal:/sys/class/thermal:ro
