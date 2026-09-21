@@ -1,0 +1,21 @@
+# Secretos por servicio
+.env
+.env.*
+!*.env.example
+
+# Secretos de Home Assistant
+homeassistant/config/secrets.yaml
+
+# Bot Token / Chat ID de Telegram (serverbox-monitor) — ver config.example.toml
+serverbox-monitor/config/config.toml
+
+# Datos del agente Monitor: DB SQLite, jwt.secret, credenciales iniciales del admin
+serverbox-monitor/data/
+
+# Dumps de MariaDB (contienen todas las bases de datos)
+mariadb/backups/
+
+# PHP-Apache: htdocs/ es código de aplicaciones (proyectos con su propio repo git,
+# Se conserva solo la landing page que lista los proyectos.
+apache/htdocs/*
+!apache/htdocs/index.php

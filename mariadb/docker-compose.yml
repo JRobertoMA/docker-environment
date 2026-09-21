@@ -1,0 +1,73 @@
+services:
+  mariadb:
+    image: mariadb:latest
+    networks:
+      - dev_net
+    container_name: mariadb
+
+    # Puerto expuesto a toda la red local (MySQL Workbench, DBeaver, apps externas a Docker)
+    ports:
+      - "3306:3306"
+
+    env_file:
+      - .env
+
+    volumes:
+      # Datos de la base de datos (persistente)
+      - ./data:/var/lib/mysql
+
+      # Configuración personalizada: cualquier .cnf aquí se carga al arrancar
+      # (carpeta vacía a propósito; es el punto de extensión estándar de MariaDB)
+      - ./config:/etc/mysql/conf.d
+
+    environment:
+      # Zona horaria
+      - TZ=America/Mexico_City
+
+      # Credenciales (root, usuario de aplicación) vienen de .env, no de aquí
+
+      # Base de datos inicial
+      - MARIADB_DATABASE=raspberrypi
+
+      # Configuración de rendimiento para Raspberry Pi 5
+      # Buffer pool (ajusta según RAM disponible en tu RPi)
+      # 256M para 4GB RAM, 512M para 8GB RAM
+      - MARIADB_INNODB_BUFFER_POOL_SIZE=512M
+
+      # Tamaño de logs
+      - MARIADB_INNODB_LOG_FILE_SIZE=64M
+
+      # Character set (UTF-8 moderno)
+      - MARIADB_CHARACTER_SET=utf8mb4
+      - MARIADB_COLLATION=utf8mb4_unicode_ci
+
+    # Comando adicional para optimizaciones
+    command: >
+      --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --max_connections=100 --max_allowed_packet=64M --general_log=0 --sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+
+    restart: unless-stopped
+
+    # Límite de memoria: buffer pool de 512M (arriba) + ~200M base + buffers
+    # por conexión. Se deja 1G de techo (no 768M) porque matar una base de
+    # datos a mitad de una escritura es peor que matar otro servicio.
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+    # Healthcheck para monitorear el estado
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+    # Labels para organización
+    labels:
+      - "com.mariadb.description=MariaDB Database"
+      - "com.mariadb.version=latest"
+      - "com.mariadb.network=exposed"
+networks:
+  dev_net:
+    external: true
