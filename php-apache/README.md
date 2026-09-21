@@ -5,7 +5,7 @@
 Edita **únicamente** el archivo `.env`:
 
 ```
-PHP_VERSION=8.6
+PHP_VERSION=8.5
 ```
 
 Luego reconstruye:
@@ -16,37 +16,7 @@ docker compose down && ./deploy.sh
 
 ---
 
-## Inicio rápido
-
-```bash
-./deploy.sh
-```
-
 El script construye la imagen, levanta el contenedor y verifica que Apache esté corriendo.
-
----
-
-## Comandos del día a día
-
-```bash
-# Ver logs en vivo
-docker compose logs -f
-
-# Detener
-docker compose down
-
-# Reiniciar
-docker compose restart
-
-# Shell del contenedor
-docker exec -it php-apache bash
-
-# Versión de PHP activa
-docker exec php-apache php -v
-
-# Extensiones instaladas
-docker exec php-apache php -m
-```
 
 ---
 
@@ -84,13 +54,6 @@ docker exec php-apache php -m
 docker compose logs
 ```
 
-### Puerto ya en uso
-Detén el contenedor anterior antes de levantar uno nuevo:
-```bash
-docker stop <nombre-contenedor-viejo> && docker rm <nombre-contenedor-viejo>
-docker compose up -d
-```
-
 ### Problemas de permisos en htdocs
 ```bash
 docker exec -it php-apache ls -la /var/www/html
@@ -100,13 +63,6 @@ docker exec -it php-apache ls -la /var/www/html
 ```bash
 docker exec php-apache apache2ctl -t
 ```
-
-### Ver phpinfo
-Crea `htdocs/info.php`:
-```php
-<?php phpinfo();
-```
-Luego abre `http://localhost:81/info.php`
 
 ---
 
