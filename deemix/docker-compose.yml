@@ -1,0 +1,21 @@
+services:
+  deemix:
+    image: registry.gitlab.com/bockiii/deemix-docker:latest
+    networks:
+      - media_net
+    container_name: Deemix
+    volumes:
+      # Carpeta de descargas del host: ruta en .env (disco USB local)
+      - ${DOWNLOADS_DIR}:/downloads
+      - ./config:/config
+    environment:
+      - PUID=1000 # ID de tu usuario (puedes verlo con el comando 'id')
+      - PGID=1000
+      - UMASK_SET=002
+      - DEEMIX_SINGLE_USER=true
+    ports:
+      - 6595:6595
+    restart: always
+networks:
+  media_net:
+    external: true

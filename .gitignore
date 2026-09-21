@@ -15,7 +15,62 @@ serverbox-monitor/data/
 # Dumps de MariaDB (contienen todas las bases de datos)
 mariadb/backups/
 
-# PHP-Apache: htdocs/ es código de aplicaciones (proyectos con su propio repo git,
+# Apache: htdocs/ es código de aplicaciones (proyectos con su propio repo git,
 # Se conserva solo la landing page que lista los proyectos.
 apache/htdocs/*
 !apache/htdocs/index.php
+
+# Certificado HTTPS de Jellyfin (.pfx con clave privada), lo regenera el hook de certbot
+jellyfin/config/certs/
+
+# Estado de JDownloader (jars, logs, y cfg/ con la contraseña de MyJDownloader en claro)
+jdownloader2/config/
+
+# Immich: fotos/vídeos subidos (+ backups de su BD) y datos de Postgres
+immich-app/library/
+immich-app/postgres/
+
+# ---------------------------------------------------------------------------
+# Datos generados por cada contenedor (bind mounts). Se versiona solo lo
+# escrito a mano: docker-compose.yml, scripts, .env.example y configs propias.
+# ---------------------------------------------------------------------------
+
+# Jellyfin: BD, metadatos, plugins, logs, certificado, caché de imágenes
+jellyfin/config/
+jellyfin/cache/
+
+# Home Assistant: todo menos los YAML escritos a mano y los themes.
+# .storage/ contiene tokens de acceso y credenciales de integraciones.
+homeassistant/config/*
+!homeassistant/config/configuration.yaml
+!homeassistant/config/automations.yaml
+!homeassistant/config/scripts.yaml
+!homeassistant/config/scenes.yaml
+!homeassistant/config/themes/
+# Mosquitto: estado y log (mosquitto.conf sí se versiona)
+homeassistant/mosquitto/data/
+homeassistant/mosquitto/log/
+
+# MariaDB: la base de datos
+mariadb/data/
+
+# Transmission: settings.json (usuario + hash), .torrent, resume, UI descargada
+transmission/config/
+
+# Deemix: config con el ARL de Deezer (token de sesión) y descargas
+deemix/config/
+deemix/downloads/
+
+# Crafty: mundos, backups, logs, BD del panel y default-creds.txt
+crafty-4/servers/
+crafty-4/backups/
+crafty-4/logs/
+crafty-4/config/
+crafty-4/import/
+
+# MySpeed: BD de mediciones
+myspeed/data/
+
+# Claude Code local (permisos de sesión)
+.claude/
+settings.local.json

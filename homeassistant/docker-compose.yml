@@ -1,0 +1,72 @@
+services:
+  homeassistant:
+    container_name: homeassistant
+    image: "ghcr.io/home-assistant/home-assistant:stable"
+    # Privilegios necesarios para acceso a hardware
+    privileged: true
+
+    # Usar la red del host (requerido para discovery y mDNS)
+    network_mode: host
+    volumes:
+      # Configuración principal de Home Assistant
+      - ./config:/config
+      # Sincronización de hora del sistema
+      - /etc/localtime:/etc/localtime:ro
+      # D-Bus para comunicación con systemd y servicios
+      - /run/dbus:/run/dbus:ro
+    # Dispositivos reservados para integraciones GPIO/serial (hoy ninguna los
+    # usa). Con privileged: true Docker expone todo /dev de todas formas, pero
+    # la lista documenta la intención y sigue funcionando si algún día se quita
+    # privileged.
+    devices:
+      # Header de 40 pines vía libgpiod (chip "pinctrl-rp1", 54 líneas)
+      - /dev/gpiochip15:/dev/gpiochip15
+      # Header de 40 pines vía mmap (RPi.GPIO / lgpio)
+      - /dev/gpiomem0:/dev/gpiomem0
+      # UART del header (/dev/serial0 es un symlink a este)
+      - /dev/ttyAMA10:/dev/ttyAMA10
+
+    environment:
+      # Zona horaria
+      - TZ=America/Mexico_City
+    restart: unless-stopped
+
+    # Límite de memoria: uso real ~570MB, estable. Sin límite, un desborde de
+    # cualquier contenedor tumba el host entero (visto varias veces).
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+    # Dependencia de Mosquitto (opcional pero recomendado)
+    depends_on:
+      - mosquitto
+
+  mosquitto:
+    container_name: mosquitto
+    image: eclipse-mosquitto:latest
+    networks:
+      - infra_net
+    volumes:
+      # Configuración de Mosquitto
+      - ./mosquitto/config:/mosquitto/config
+      # Datos persistentes
+      - ./mosquitto/data:/mosquitto/data
+      # Logs
+      - ./mosquitto/log:/mosquitto/log
+
+    ports:
+      # Puerto MQTT estándar (TCP sin TLS)
+      - "1883:1883"
+      # Puerto WebSocket (opcional, por si lo necesitas después)
+      - "9001:9001"
+
+    environment:
+      # Zona horaria
+      - TZ=America/Mexico_City
+
+    restart: unless-stopped
+
+networks:
+  infra_net:
+    external: true

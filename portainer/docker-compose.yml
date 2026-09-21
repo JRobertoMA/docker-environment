@@ -1,0 +1,22 @@
+services:
+  portainer:
+    container_name: portainer
+    image: portainer/portainer-ce:lts
+    networks:
+      - infra_net
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    ports:
+      # UI (HTTPS, certificado autofirmado). El 8000 (túnel de Edge Agents,
+      # para administrar hosts remotos) se quitó: solo existe el entorno local.
+      - 9443:9443
+
+volumes:
+  portainer_data:
+    name: portainer_data
+
+networks:
+  infra_net:
+    external: true

@@ -1,0 +1,87 @@
+services:
+  jdownloader-2:
+    image: jlesage/jdownloader-2:latest
+    networks:
+      - infra_net
+    container_name: jdownloader-2
+
+    ports:
+      # Interfaz web
+      - "5800:5800"
+
+      # MyJDownloader Direct Connection (IMPORTANTE: el puerto del host DEBE ser 3129)
+      - "3129:3129"
+
+    env_file:
+      - .env
+
+    volumes:
+      # Configuración de JDownloader
+      - ./config:/config:rw
+
+      # Directorio de descargas
+      # Rutas del host en .env. Las rutas DENTRO del contenedor se quedan
+      # literales: JDownloader guarda su carpeta de descarga por defecto como
+      # /output/CFE7-52E0/Descargas/<paquete> y cambiarlas rompería los enlaces.
+      - ${DOWNLOADS_DIR_1}:/output/CFE7-52E0/Descargas:rw
+      - ${DOWNLOADS_DIR_2}:/output/D064-E750/Descargas:rw
+
+      # Sincronización de hora del sistema
+      - /etc/localtime:/etc/localtime:ro
+
+    environment:
+      # Usuario y grupo para permisos correctos
+      - USER_ID=1000
+      - GROUP_ID=1000
+
+      # Zona horaria
+      - TZ=America/Mexico_City
+
+      # Permisos de archivos (002 = lectura para todos, escritura solo propietario)
+      - UMASK=002
+
+      # Idioma (español de México)
+      - LANG=es_MX.UTF-8
+
+      # Mantener JDownloader corriendo si se cierra
+      - KEEP_APP_RUNNING=1
+
+      # Modo oscuro (1 = activado, 0 = desactivado)
+      - DARK_MODE=1
+
+      # Administrador de archivos web (1 = activado)
+      - WEB_FILE_MANAGER=1
+
+      # Rutas permitidas para el administrador de archivos. Solo descargas:
+      # el valor AUTO incluye también /config, y ahí la imagen deja la
+      # contraseña de MyJDownloader en claro (cfg/*.MyJDownloaderSettings.json),
+      # legible desde la web sin login.
+      - WEB_FILE_MANAGER_ALLOWED_PATHS=/output
+
+      # Credenciales de MyJDownloader vienen de .env, no de aquí
+
+      # Audio web (opcional, para reproducir sonidos en el navegador)
+      - WEB_AUDIO=1
+
+      # Dimensiones de la pantalla virtual
+      - DISPLAY_WIDTH=1920
+      - DISPLAY_HEIGHT=1080
+
+      # Heap máximo de la JVM (-Xmx). Sin esto, Java toma el 25% del límite
+      # del cgroup de abajo = 256MB, insuficiente para descargas grandes y
+      # fallaría por dentro (OutOfMemoryError) sin que el contenedor muera.
+      # 512M de heap + JVM no-heap + escritorio VNC caben en el límite de 1G.
+      - JDOWNLOADER_MAX_MEM=512M
+
+    restart: unless-stopped
+
+    # Límite de memoria: uso real ~490MB. Sin límite, un desborde de cualquier
+    # contenedor tumba el host entero (visto varias veces).
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+networks:
+  infra_net:
+    external: true

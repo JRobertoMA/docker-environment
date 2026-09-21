@@ -1,0 +1,50 @@
+[server]
+host = "0.0.0.0"
+port = 3770
+
+[monitoring]
+interval_seconds = 7
+
+[monitoring.extended.idle_pause]
+enabled = true
+
+[[monitoring.rules]]
+name = "CPU alta"
+monitor_type = "cpu"
+threshold = ">=77%"
+matcher = "cpu"
+
+[[monitoring.rules]]
+name = "Disco casi lleno"
+monitor_type = "disk"
+threshold = ">=85%"
+matcher = "/"
+
+[[monitoring.rules]]
+name = "Poca memoria libre"
+monitor_type = "memory"
+threshold = "<=10%"
+matcher = "avail"
+
+[[monitoring.rules]]
+name = "Temperatura alta"
+monitor_type = "temperature"
+threshold = ">=75c"
+matcher = "cpu-thermal"
+
+[remote_access]
+ssh_addr = "127.0.0.1:22"
+full_access = false
+
+[[push]]
+name = "telegram"
+push_type = "webhook"
+url = "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/sendMessage"
+method = "POST"
+
+[push.headers]
+"Content-Type" = "application/json"
+
+[push.body_template]
+chat_id = "<TELEGRAM_CHAT_ID>"
+text = "⚠️ Aviso del servidor {{name}}\n{{message}}"

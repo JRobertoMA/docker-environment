@@ -63,11 +63,6 @@ services:
       retries: 3
       start_period: 60s
 
-    # Labels para organización
-    labels:
-      - "com.mariadb.description=MariaDB Database"
-      - "com.mariadb.version=latest"
-      - "com.mariadb.network=exposed"
 networks:
   dev_net:
     external: true

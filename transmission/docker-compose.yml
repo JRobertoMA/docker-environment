@@ -1,0 +1,71 @@
+services:
+  transmission:
+    image: lscr.io/linuxserver/transmission:latest
+    networks:
+      - infra_net
+    ports:
+      - "9091:9091"
+      - "51413:51413/tcp"
+      - "51413:51413/udp"
+    container_name: transmission
+
+    env_file:
+      - .env
+
+    environment:
+      # Usuario y grupo (importante para permisos)
+      - PUID=1000
+      - PGID=1000
+      # Zona horaria
+      - TZ=America/Mexico_City
+      # USER/PASS (autenticación WebUI) vienen de .env, no de aquí
+      # ============================================
+      # CONFIGURACIÓN DE RED
+      # ============================================
+      # WHITELIST (IPs con permiso de conectarse al RPC; no reemplaza el login)
+      # y HOST_WHITELIST (nombres de host aceptados) vienen de .env: llevan
+      # dominios reales y el esquema de la LAN. Ver .env.example y README.
+      # Dos entradas de WHITELIST no son obvias y no hay que quitarlas:
+      # - 127.0.0.1: loopback DEL CONTENEDOR; sin él el healthcheck recibe 403
+      #   y el contenedor queda "unhealthy" para siempre.
+      # - 172.30.20.1: gateway de infra_net = el propio host. Así llega
+      #   cloudflared (túnel → localhost:9091); sin esto el túnel da 403.
+      # El puerto 9091 también está publicado en IPv6 ([::]) y el DNS público
+      # del host apunta a su IPv6 global: quien entre por ahí verá 403 porque
+      # su origen no está en la lista. Es intencional.
+      # Puerto para peers/torrents (opcional, default: 51413)
+      - PEERPORT=51413
+      # ============================================
+      # UMASK (Permisos de archivos)
+      # ============================================
+      # 022 = archivos: 644, directorios: 755 (recomendado)
+      # 002 = archivos: 664, directorios: 775 (más permisivo)
+      - UMASK=002
+    volumes:
+      # ============================================
+      # VOLÚMENES
+      # ============================================
+      # Configuración de Transmission (settings.json, etc)
+      - ./config:/config
+      # Directorio de descargas
+      # Ruta del host en .env (disco USB local)
+      - ${DOWNLOADS_DIR}:/downloads
+      # Carpeta para auto-agregar torrents (opcional)
+      # Cualquier .torrent que pongas aquí se agregará automáticamente
+      - ${DOWNLOADS_DIR}/watch:/watch
+    restart: unless-stopped
+    # ============================================
+    # HEALTHCHECK
+    # ============================================
+    # Se autentica con USER/PASS (llegan al entorno del contenedor vía .env):
+    # con rpc-authentication-required, sin credenciales la respuesta es 401.
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -fsS -o /dev/null -u \"$$USER:$$PASS\" http://127.0.0.1:9091/transmission/web/" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  infra_net:
+    external: true

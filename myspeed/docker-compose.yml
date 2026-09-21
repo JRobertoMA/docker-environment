@@ -1,0 +1,14 @@
+services:
+    germannewsmaker-myspeed:
+        image: germannewsmaker/myspeed:latest
+        networks:
+            - monitor_net
+        ports:
+            - "5216:5216"
+        container_name: myspeed
+        volumes:
+            - ./data:/myspeed/data
+        restart: unless-stopped
+networks:
+    monitor_net:
+        external: true

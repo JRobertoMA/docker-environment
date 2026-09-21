@@ -1,0 +1,42 @@
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    networks:
+      - media_net
+    ports:
+      - "8096:8096"
+      - "8920:8920"
+    volumes:
+      # Configuración de Jellyfin (BD, metadatos, plugins, logs)
+      - ./config:/config
+      # Cache de Jellyfin (imágenes, transcodes temporales)
+      - ./cache:/cache
+      # Bibliotecas:
+      # Rutas del host en .env. Las rutas /media/<x> DENTRO del contenedor se
+      # quedan literales: las bibliotecas de Jellyfin las tienen grabadas.
+      - ${MEDIA_DIR_1}:/media/7E7F-B293
+      - ${MEDIA_DIR_2}:/media/B9C8-6B60
+    devices:
+      # GPU/DRM: hoy la aceleración por hardware está en "none" (encoding.xml)
+      # y el Pi 5 no tiene encoder H.264 por hardware, pero se deja disponible
+      # por si se activa el decoder HEVC. Los /dev/video*/media* (V4L2) se
+      # quitaron por no usarse.
+      - /dev/dri:/dev/dri
+    environment:
+      # Zona horaria
+      - TZ=America/Mexico_City
+
+    restart: unless-stopped
+
+    # Límite de memoria: si Jellyfin se desborda, cgroups lo mata y Docker lo
+    # reinicia solo a él, en vez de que el host entero se quede sin RAM y el
+    # kernel se congele duro (visto varias veces sin este límite).
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+
+networks:
+  media_net:
+    external: true

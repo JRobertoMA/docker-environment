@@ -1,0 +1,12 @@
+services:
+  openspeedtest:
+    image: openspeedtest/latest:latest
+    networks:
+      - monitor_net
+    container_name: openspeedtest
+    ports:
+      - "3001:3000"
+    restart: unless-stopped
+networks:
+  monitor_net:
+    external: true

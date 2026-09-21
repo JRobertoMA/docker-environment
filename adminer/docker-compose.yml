@@ -1,0 +1,29 @@
+services:
+  adminer:
+    image: adminer:latest
+    networks:
+      - dev_net
+    container_name: adminer
+
+    ports:
+      # Puerto para acceder a Adminer desde navegador
+      - "8080:8080"
+
+    environment:
+      # Establecer servidor por defecto (opcional)
+      # Si lo configuras, Adminer se conectará automáticamente a este servidor
+      - ADMINER_DEFAULT_SERVER=mariadb:3306
+
+    restart: unless-stopped
+
+    # Healthcheck para monitorear el estado
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "8080" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  dev_net:
+    external: true

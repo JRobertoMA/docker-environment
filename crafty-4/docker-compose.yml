@@ -1,0 +1,30 @@
+services:
+  crafty:
+    image: arcadiatechnology/crafty-4:latest
+    container_name: crafty
+    network_mode: host
+
+    environment:
+      - TZ=America/Mexico_City
+
+    volumes:
+      - ./config:/crafty/app/config
+      - ./servers:/crafty/servers
+      - ./backups:/crafty/backups
+      - ./logs:/crafty/logs
+      - ./import:/crafty/import
+
+    restart: unless-stopped
+
+    # La imagen no trae curl ni wget, solo python3; /api/v2 responde 200 sin
+    # autenticación (el /api/v2/ping que había aquí no existe: 404). El cert
+    # de 8443 es autofirmado, de ahí el contexto SSL sin verificación.
+    healthcheck:
+      test: [ "CMD", "python3", "-c", "import urllib.request,ssl;c=ssl.create_default_context();c.check_hostname=False;c.verify_mode=ssl.CERT_NONE;urllib.request.urlopen('https://localhost:8443/api/v2',context=c,timeout=5)" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+    labels:
+      - "com.crafty.description=Crafty Controller - Minecraft Server Manager"
