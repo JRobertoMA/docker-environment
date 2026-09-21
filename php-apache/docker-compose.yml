@@ -18,6 +18,8 @@ services:
                     memory: "256M"
         hostname: php-apache
         image: my-php-${PHP_VERSION}:latest
+        networks:
+            - dev_net
         ports:
             - "81:80"
         restart: unless-stopped
@@ -25,3 +27,6 @@ services:
             - ./htdocs/:/var/www/html
             - ./config/php/php.ini:/usr/local/etc/php/php.ini
             - /sys/class/thermal:/sys/class/thermal:ro
+networks:
+    dev_net:
+        external: true
