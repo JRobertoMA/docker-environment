@@ -13,12 +13,6 @@ services:
       - SBM_PORT=3770
       - DATABASE_URL=sqlite:/app/data/serverbox_monitor.db
       - RUST_LOG=info
-      # full_access viene ENCENDIDO por defecto en Linux si config.toml no lo
-      # declara — y config.toml vive dentro del contenedor (se regenera con
-      # valores por defecto en cada recreación), así que la garantía tiene que
-      # estar aquí. El entorno puede desactivarlo pero nunca reabrirlo
-      # silenciosamente (core/remote_access.rs::resolve_full_access).
-      - SBM_FULL_ACCESS=0
     # Auto-siembra: /app/config.toml NO se monta como archivo a propósito (el
     # agente lo reescribe con rename atómico al guardar ajustes desde la app, y
     # un bind-mount de archivo rompe ese rename con EBUSY). En su lugar se monta

@@ -16,7 +16,7 @@ services:
                     memory: "768M"
                 reservations:
                     memory: "256M"
-        hostname: php-apache
+        uts: host
         image: my-php-${PHP_VERSION}:latest
         networks:
             - dev_net

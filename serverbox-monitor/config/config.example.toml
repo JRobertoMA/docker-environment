@@ -34,7 +34,6 @@ matcher = "cpu-thermal"
 
 [remote_access]
 ssh_addr = "127.0.0.1:22"
-full_access = false
 
 [[push]]
 name = "telegram"
