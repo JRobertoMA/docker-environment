@@ -1,14 +1,12 @@
 services:
     germannewsmaker-myspeed:
-        image: germannewsmaker/myspeed:latest
-        networks:
-            - monitor_net
-        ports:
-            - "5216:5216"
+        # Variante publicada desde ~/Documents/github/MySpeed (rama hostnet) — ver HOSTNET.md
+        image: ghcr.io/jrobertoma/myspeed-hostnet:1.0.9-hostnet.1
+        # Red host: el bridge + NAT de Docker limitaba la bajada medida (~300 vs ~1100 Mbps)
+        network_mode: host
         container_name: myspeed
         volumes:
             - ./data:/myspeed/data
+        environment:
+            - TZ=America/Mexico_City
         restart: unless-stopped
-networks:
-    monitor_net:
-        external: true
